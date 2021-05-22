@@ -1,2 +1,2 @@
-# Shayshoon.github.io
-My portfolio
+# Shayshoon
+Soon to be my portfolio
