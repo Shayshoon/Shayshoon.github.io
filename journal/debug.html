@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head><title>Journal Debug</title></head>
+<body>
+<h1>Journal Debug Page</h1>
+<pre id="output">Running tests...</pre>
+
+<script src="/assets/js/marked.min.js"></script>
+<script src="/assets/js/journal.js"></script>
+<script>
+  const out = document.getElementById('output');
+  function log(msg) { out.textContent += '\n' + msg; }
+
+  (async function() {
+    try {
+      log('1. window.marked exists: ' + !!window.marked);
+      log('2. window.Journal exists: ' + !!window.Journal);
+      
+      // Test manifest fetch
+      const manifestRes = await fetch('/journal/posts/manifest.json');
+      log('3. manifest fetch status: ' + manifestRes.status);
+      const manifestData = await manifestRes.json();
+      log('4. manifest data keys: ' + Object.keys(manifestData));
+      const posts = Array.isArray(manifestData) ? manifestData : manifestData.posts;
+      log('5. posts count: ' + posts.length);
+      log('6. first post slug: ' + posts[0].slug);
+      
+      // Test post fetch
+      const postRes = await fetch('/journal/posts/' + posts[0].slug + '.md');
+      log('7. post fetch status: ' + postRes.status);
+      const mdText = await postRes.text();
+      log('8. md text length: ' + mdText.length);
+      log('9. md starts with ---: ' + mdText.startsWith('---'));
+      log('10. first 50 chars: ' + JSON.stringify(mdText.substring(0, 50)));
+      
+      // Test frontmatter parsing
+      const parsed = window.Journal.parseFrontmatter(mdText);
+      log('11. parsed meta: ' + JSON.stringify(parsed.meta));
+      log('12. parsed content length: ' + parsed.content.length);
+      
+      // Test marked
+      const html = window.marked.parse(parsed.content);
+      log('13. rendered HTML length: ' + html.length);
+      log('14. rendered HTML preview: ' + html.substring(0, 100));
+      
+      log('\n=== ALL TESTS PASSED ===');
+    } catch(e) {
+      log('ERROR: ' + e.message);
+      log('Stack: ' + e.stack);
+    }
+  })();
+</script>
+</body>
+</html>

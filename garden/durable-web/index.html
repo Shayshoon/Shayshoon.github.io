@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="On making websites that outlast frameworks, services, and trends.">
+  <title>Building for the Durable Web — Shay's Digital Home</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed.xml">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
+
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main Navigation">
+      <a href="/" class="nav-home">~shay</a>
+      <ul class="nav-links">
+        <li><a href="/about/">About</a></li>
+        <li><a href="/now/">Now</a></li>
+        <li><a href="/journal/">Journal</a></li>
+        <li><a href="/garden/" class="active" aria-current="page">Garden</a></li>
+        <li><a href="/projects/">Projects</a></li>
+        <li><a href="/links/">Links</a></li>
+      </ul>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">
+        <span class="theme-icon" aria-hidden="true">◐</span>
+      </button>
+    </nav>
+  </header>
+
+  <main id="main-content" class="content-wrapper">
+    <article>
+      <h1>Building for the Durable Web</h1>
+      <p class="note-meta">Status: <span class="note-status status-evergreen">🌲 Evergreen</span> · Planted: March 15, 2026 · Last tended: July 20, 2026</p>
+      
+      <p>The web's original promise was remarkably simple yet profoundly resilient: documents linked together, accessible by anyone, readable by any browser, regardless of the underlying operating system or device capabilities. It was designed to be democratic and durable. Today, however, much of the web has drifted from this foundation.</p>
+
+      <p>Modern web development often relies on complex frameworks, massive dependency trees, and convoluted build steps. While these tools can offer developer convenience in the short term, they introduce fragility. A site built heavily on a specific Javascript framework might break entirely if a single library deprecates, a service changes its API, or a dependency is compromised. We're building digital sandcastles that erode with the slightest shift in the technological tide.</p>
+
+      <blockquote>
+        "The web isn't broken, but our approach to building for it often is. We've traded resilience for fleeting convenience."
+      </blockquote>
+
+      <p>The case for plain HTML and CSS is stronger than ever. It's an undeniable fact of web architecture: a page written in raw HTML in 1999 still loads flawlessly in browsers today. No npm installs required, no breaking changes to fix, no Webpack configurations to debug. The fundamental technologies of the web—HTML, CSS, and vanilla JS—are designed for unparalleled backwards compatibility.</p>
+
+      <p>To build a durable web, we should embrace practical principles:</p>
+      <ul>
+        <li><strong>Semantic HTML:</strong> Use tags for their intended structural meaning, ensuring accessibility and machine readability.</li>
+        <li><strong>Progressive Enhancement:</strong> Start with a robust, functional core that works everywhere, then layer on stylistic and interactive enhancements for capable browsers.</li>
+        <li><strong>Zero Build Steps:</strong> Whenever possible, serve the files you write. Avoid compilers and bundlers for simple static content.</li>
+        <li><strong>Minimal Dependencies:</strong> Rely on native browser APIs rather than external libraries. The fewer moving parts, the fewer points of failure.</li>
+      </ul>
+
+      <p>This very website is an exercise in practicing what I preach. It's handcrafted, devoid of heavy frameworks, and serves content as simple text files over the network. It's not just about nostalgia; it's about creating a digital home that I know will still be standing, easily readable, a decade from now without requiring constant maintenance. A durable web is a peaceful web.</p>
+
+      <h2>Related Notes</h2>
+      <ul>
+        <li><a href="/garden/gardens-vs-streams/">Digital Gardens vs. The Stream</a></li>
+      </ul>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <nav class="webring-nav" aria-label="Webring">
+      <span class="webring-title">IndieWeb Webring</span>
+      <a href="https://webring.example.com/prev" title="Previous Site">&larr; Prev</a>
+      <a href="https://webring.example.com/random" title="Random Site">&#9858; Random</a>
+      <a href="https://webring.example.com/next" title="Next Site">Next &rarr;</a>
+    </nav>
+    <p class="footer-text">
+      Built with plain HTML, CSS &amp; a sprinkle of JS. No tracking. No frameworks. Just the open web.<br>
+      Content shared under <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">CC BY-SA 4.0</a> unless noted.
+    </p>
+  </footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>
