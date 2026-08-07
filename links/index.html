@@ -11,22 +11,7 @@
 <body>
   <a href="#main-content" class="skip-link">Skip to content</a>
 
-  <header class="site-header">
-    <nav class="site-nav" aria-label="Main Navigation">
-      <a href="/" class="nav-home">~shay</a>
-      <ul class="nav-links">
-        <li><a href="/about/">About</a></li>
-        <li><a href="/now/">Now</a></li>
-        <li><a href="/journal/">Journal</a></li>
-        <li><a href="/garden/">Garden</a></li>
-        <li><a href="/projects/">Projects</a></li>
-        <li><a href="/links/" class="active" aria-current="page">Links</a></li>
-      </ul>
-      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">
-        <span class="theme-icon" aria-hidden="true">◐</span>
-      </button>
-    </nav>
-  </header>
+  <site-header></site-header>
 
   <main id="main-content" class="content-wrapper">
     <article>
@@ -179,19 +164,9 @@
     </article>
   </main>
 
-  <footer class="site-footer">
-    <nav class="webring-nav" aria-label="Webring">
-      <span class="webring-title">IndieWeb Webring</span>
-      <a href="https://webring.example.com/prev" title="Previous Site">&larr; Prev</a>
-      <a href="https://webring.example.com/random" title="Random Site">&#9858; Random</a>
-      <a href="https://webring.example.com/next" title="Next Site">Next &rarr;</a>
-    </nav>
-    <p class="footer-text">
-      Built with plain HTML, CSS &amp; a sprinkle of JS. No tracking. No frameworks. Just the open web.<br>
-      Content shared under <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">CC BY-SA 4.0</a> unless noted.
-    </p>
-  </footer>
+  <site-footer></site-footer>
 
+  <script src="/assets/js/components.js" defer></script>
   <script src="/assets/js/main.js" defer></script>
 </body>
 </html>

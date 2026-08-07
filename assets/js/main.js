@@ -1,8 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Theme Toggle
-  const themeToggle = document.getElementById('theme-toggle');
-  const themeIcon = themeToggle?.querySelector('.theme-icon');
-  
+  let themeToggle, themeIcon;
+
   const ICONS = {
     auto: '◐',
     light: '☀',
@@ -35,12 +33,21 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTheme(nextTheme);
   }
 
-  if (themeToggle) {
-    themeToggle.addEventListener('click', cycleTheme);
+  function initThemeToggle() {
+    const siteHeader = document.querySelector('site-header');
+    if (siteHeader) {
+      themeToggle = siteHeader.querySelector('#theme-toggle');
+      themeIcon = themeToggle?.querySelector('.theme-icon');
+      if (themeToggle) {
+        themeToggle.addEventListener('click', cycleTheme);
+      }
+    }
+    applyTheme(getTheme());
   }
 
-  // Initialize theme on load
-  applyTheme(getTheme());
+  // Since components.js is a deferred script that runs before main.js, 
+  // the custom element is already defined and upgraded by the time DOMContentLoaded fires.
+  initThemeToggle();
 
   // Embed Badge Textarea Auto-Select
   const badgeEmbed = document.querySelector('.badge-embed');
