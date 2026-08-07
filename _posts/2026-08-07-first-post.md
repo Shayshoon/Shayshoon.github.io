@@ -16,4 +16,4 @@ location: Technion
 
 תודה על הקריאה :)
 
-![חתול](https://photos.app.goo.gl/LqkuUHh9QFfgZFk87)
+![](PXL_20260704_150449697.MP.jpg)
