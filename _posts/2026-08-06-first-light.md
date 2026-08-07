@@ -1,7 +1,7 @@
 ---
 title: First Light
 date: 2026-08-06
-time: 09:15
+time: "09:15"
 location: Home
 ---
 

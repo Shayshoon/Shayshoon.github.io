@@ -1,7 +1,7 @@
 ---
 title: Morning Walk Observations
 date: 2026-08-04
-time: 07:30
+time: "07:30"
 location: Yarkon Park, Tel Aviv
 ---
 
