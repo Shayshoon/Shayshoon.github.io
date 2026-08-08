@@ -16,4 +16,4 @@ location: Technion
 
 תודה על הקריאה :)
 
-![](../images/PXL_20260704_150449697.MP.jpg)
+![](images/PXL_20260704_150449697.MP.jpg)
