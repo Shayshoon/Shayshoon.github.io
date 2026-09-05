@@ -332,4 +332,70 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   initPostLightbox();
+
+  // Subscribe Form AJAX Handler (Google Sheets via Apps Script)
+  function initSubscribeForm() {
+    const forms = document.querySelectorAll('.subscribe-form');
+    forms.forEach(form => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const actionUrl = form.getAttribute('action')?.trim();
+        const submitBtn = form.querySelector('.subscribe-submit-btn');
+        const input = form.querySelector('.subscribe-input');
+        const statusMsg = form.querySelector('.subscribe-status-msg');
+        const email = input ? input.value.trim() : '';
+
+        if (!actionUrl || !email) return;
+
+        const originalBtnText = submitBtn ? submitBtn.textContent : 'Subscribe';
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Subscribing...';
+        }
+        if (statusMsg) {
+          statusMsg.style.display = 'none';
+        }
+
+        try {
+          const params = new URLSearchParams();
+          params.append('email', email);
+          params.append('date', new Date().toISOString());
+
+          await fetch(actionUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString(),
+            mode: 'no-cors'
+          });
+
+          if (input) input.value = '';
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Subscribed!';
+          }
+          if (statusMsg) {
+            statusMsg.textContent = "✓ You're subscribed! Thanks for following along.";
+            statusMsg.className = 'subscribe-status-msg success';
+            statusMsg.style.display = 'block';
+          }
+          setTimeout(() => {
+            if (submitBtn) submitBtn.textContent = originalBtnText;
+          }, 4000);
+        } catch (err) {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalBtnText;
+          }
+          if (statusMsg) {
+            statusMsg.textContent = 'Oops, something went wrong. Please try again or subscribe via RSS.';
+            statusMsg.className = 'subscribe-status-msg error';
+            statusMsg.style.display = 'block';
+          }
+        }
+      });
+    });
+  }
+
+  initSubscribeForm();
 });
+

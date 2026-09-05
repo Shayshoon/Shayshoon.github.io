@@ -1,0 +1,41 @@
+name: Broadcast New Post
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '_posts/**'
+  workflow_dispatch:
+    inputs:
+      post_file:
+        description: 'Specific post file path (e.g. _posts/2026-09-05-Taiwan.md, leave empty for newest)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Dry run test (do not send emails)'
+        type: boolean
+        default: false
+
+jobs:
+  broadcast:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run Broadcast
+        env:
+          APPS_SCRIPT_URL: ${{ secrets.APPS_SCRIPT_URL }}
+          BROADCAST_SECRET: ${{ secrets.BROADCAST_SECRET }}
+          POST_FILE: ${{ github.event.inputs.post_file }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
+        run: |
+          node .github/scripts/broadcast.js

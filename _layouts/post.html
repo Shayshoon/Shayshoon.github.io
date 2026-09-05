@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <base href="/">
   <meta charset="UTF-8">
@@ -8,8 +9,8 @@
   <title>{{ page.title }} — Shay's Digital Home</title>
   <link rel="stylesheet" href="/assets/css/style.css">
   <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed.xml">
-  <meta name="follow.it-verification-code" content="QNvPJMLtGQK6qJl7qtZq"/>
 </head>
+
 <body>
   <a href="#main-content" class="skip-link">Skip to content</a>
 
@@ -26,22 +27,22 @@
         </div>
       </div>
     </div>
-    
+
     {% if page.photos or page.gallery %}
     <div class="post-photo-strip-container">
       <div class="post-photo-strip" aria-label="Photo strip gallery">
         {% assign strip_items = page.photos | default: page.gallery %}
         {% for item in strip_items %}
-          {% if item.image or item.url or item.src %}
-            {% assign img_url = item.image | default: item.url | default: item.src %}
-            {% assign img_caption = item.caption | default: item.alt | default: '' %}
-          {% else %}
-            {% assign img_url = item %}
-            {% assign img_caption = '' %}
-          {% endif %}
-          <button class="strip-thumb-btn" type="button" aria-label="View photo in gallery">
-            <img src="{{ img_url }}" alt="{{ img_caption }}" class="strip-thumb-img" />
-          </button>
+        {% if item.image or item.url or item.src %}
+        {% assign img_url = item.image | default: item.url | default: item.src %}
+        {% assign img_caption = item.caption | default: item.alt | default: '' %}
+        {% else %}
+        {% assign img_url = item %}
+        {% assign img_caption = '' %}
+        {% endif %}
+        <button class="strip-thumb-btn" type="button" aria-label="View photo in gallery">
+          <img src="{{ img_url }}" alt="{{ img_caption }}" class="strip-thumb-img" />
+        </button>
         {% endfor %}
       </div>
     </div>
@@ -63,4 +64,5 @@
   <script src="/assets/js/components.js" defer></script>
   <script src="/assets/js/main.js" defer></script>
 </body>
+
 </html>
