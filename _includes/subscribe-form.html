@@ -1,0 +1,27 @@
+<div class="subscribe-box">
+  <div class="subscribe-box-header">
+    <h3>Subscribe to new posts</h3>
+    <p>Get an email notification whenever I write something new. Enter your email below:</p>
+  </div>
+  <form
+    action="{{ site.subscribe_action_url }}"
+    method="POST"
+    class="subscribe-form"
+  >
+    <div class="subscribe-form-row">
+      <input
+        type="email"
+        name="email"
+        class="subscribe-input"
+        placeholder="your@email.com"
+        aria-label="Your email address"
+        required
+      />
+      <button type="submit" class="subscribe-submit-btn">Subscribe</button>
+    </div>
+    <div class="subscribe-status-msg" style="display: none;"></div>
+    <div class="subscribe-footer-note">
+      <span>Or follow along via <a href="/feed.xml" target="_blank" rel="noopener">📡 RSS Feed</a></span>
+    </div>
+  </form>
+</div>

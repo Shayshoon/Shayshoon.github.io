@@ -502,6 +502,113 @@ html[data-theme='dark'] .status-evergreen { color: #a5d6a7; }
   text-decoration: underline;
 }
 
+/* Subscribe Box Component */
+.subscribe-box {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  background-color: var(--code-bg);
+}
+
+.subscribe-box-header h3 {
+  margin-top: 0;
+  margin-bottom: 0.35rem;
+  font-size: 1.2rem;
+}
+
+.subscribe-box-header p {
+  margin: 0 0 1rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.subscribe-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.subscribe-form-row {
+  display: flex;
+  gap: 0.5rem;
+  max-width: 480px;
+  flex-wrap: wrap;
+}
+
+.subscribe-input {
+  flex: 1 1 220px;
+  padding: 0.6rem 0.85rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.subscribe-input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(156, 65, 37, 0.15);
+}
+
+.subscribe-submit-btn {
+  padding: 0.6rem 1.25rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: var(--accent-color);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.subscribe-submit-btn:hover,
+.subscribe-submit-btn:focus-visible {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.subscribe-footer-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.subscribe-footer-note a {
+  color: var(--text-muted);
+  text-decoration: underline;
+}
+
+.subscribe-footer-note a:hover {
+  color: var(--accent-color);
+}
+
+.subscribe-status-msg {
+  font-size: 0.88rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  max-width: 480px;
+}
+
+.subscribe-status-msg.success {
+  color: #2e7d32;
+  background-color: rgba(46, 125, 50, 0.12);
+  border: 1px solid rgba(46, 125, 50, 0.3);
+}
+
+.subscribe-status-msg.error {
+  color: #c62828;
+  background-color: rgba(198, 40, 40, 0.12);
+  border: 1px solid rgba(198, 40, 40, 0.3);
+}
+
 /* Journal post content */
 .journal-post-meta {
   margin-bottom: 2rem;

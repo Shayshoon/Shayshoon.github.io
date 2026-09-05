@@ -50,9 +50,10 @@
       {{ content }}
     </div>
 
-    <p style="margin-top: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    {% include subscribe-form.html %}
+
+    <p style="margin-top: 1.5rem;">
       <a href="/journal/">← Back to Journal</a>
-      <a href="/feed.xml" class="rss-post-link" title="Subscribe to RSS feed" target="_blank" rel="noopener">📡 Subscribe via RSS</a>
     </p>
   </main>
 

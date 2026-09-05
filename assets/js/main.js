@@ -57,6 +57,66 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Handle Email Subscribe Form Submission (Google Sheets)
+  function initSubscribeForm() {
+    const subscribeForms = document.querySelectorAll('.subscribe-form');
+    subscribeForms.forEach(form => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const actionUrl = form.getAttribute('action')?.trim();
+        const submitBtn = form.querySelector('.subscribe-submit-btn');
+        const input = form.querySelector('.subscribe-input');
+        const statusMsg = form.querySelector('.subscribe-status-msg');
+        const email = input.value.trim();
+
+        if (!actionUrl || actionUrl === "") {
+          if (statusMsg) {
+            statusMsg.textContent = 'Please configure your Google Sheet URL in _config.yml to start collecting emails.';
+            statusMsg.className = 'subscribe-status-msg error';
+            statusMsg.style.display = 'block';
+          }
+          return;
+        }
+
+        const originalBtnText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Subscribing...';
+        if (statusMsg) statusMsg.style.display = 'none';
+
+        try {
+          const formData = new FormData();
+          formData.append('email', email);
+          formData.append('date', new Date().toISOString());
+
+          await fetch(actionUrl, {
+            method: 'POST',
+            body: formData,
+            mode: 'no-cors'
+          });
+
+          input.value = '';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Subscribed!';
+          if (statusMsg) {
+            statusMsg.textContent = "✓ You're subscribed! Thanks for following along.";
+            statusMsg.className = 'subscribe-status-msg success';
+            statusMsg.style.display = 'block';
+          }
+        } catch (err) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalBtnText;
+          if (statusMsg) {
+            statusMsg.textContent = 'Oops, something went wrong. Please try again or subscribe via RSS.';
+            statusMsg.className = 'subscribe-status-msg error';
+            statusMsg.style.display = 'block';
+          }
+        }
+      });
+    });
+  }
+
+  initSubscribeForm();
+
   // Journal Post Image Lightbox & Scrollable Gallery
   function initPostLightbox() {
     const journalContent = document.querySelector('.journal-content');
