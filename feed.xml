@@ -1,0 +1,56 @@
+---
+layout: null
+---
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>{{ site.title | default: "Shay's Digital Home" | xml_escape }}</title>
+  <subtitle>{{ site.description | xml_escape }}</subtitle>
+  <link href="{{ site.url }}/feed.xml" rel="self" type="application/atom+xml"/>
+  <link href="{{ site.url }}/"/>
+  <updated>{{ site.time | date_to_xmlschema }}</updated>
+  <id>{{ site.url }}/</id>
+  <author>
+    <name>{{ site.author | default: "Shay" | xml_escape }}</name>
+  </author>
+
+  {% for post in site.posts limit: 20 %}
+    <entry>
+      <title>{{ post.title | xml_escape }}</title>
+      <link href="{{ site.url }}{{ post.url }}"/>
+      <updated>{{ post.date | date_to_xmlschema }}</updated>
+      <id>{{ site.url }}{{ post.url }}</id>
+      <summary type="html">{{ post.summary | default: post.excerpt | strip_html | xml_escape }}</summary>
+      <content type="html">
+        <![CDATA[
+          <div style="font-family: system-ui, sans-serif; line-height: 1.6; color: #2c2a29; max-width: 600px;">
+            <p style="color: #5e5a56; font-size: 0.9em; margin-bottom: 1.2em;">
+              <strong>Date:</strong> {{ post.date | date: "%B %-d, %Y" }}
+              {% if post.time %}<br><strong>Time:</strong> {{ post.time }}{% endif %}
+              {% if post.location %}<br><strong>Location:</strong> {{ post.location }}{% endif %}
+            </p>
+
+            <div style="font-size: 1.05em; margin: 1.2em 0;">
+              {% if post.summary %}
+                <p>{{ post.summary }}</p>
+              {% else %}
+                <p>{{ post.excerpt | strip_html | truncatewords: 50 }}</p>
+              {% endif %}
+            </div>
+
+            <p style="margin: 1.5em 0;">
+              <a href="{{ site.url }}{{ post.url }}" style="color: #9c4125; font-weight: bold; text-decoration: underline;">
+                Read the full post and view photos on the website &rarr;
+              </a>
+            </p>
+
+            <hr style="border: none; border-top: 1px dashed #e2ded6; margin: 2em 0 1em;" />
+
+            <p style="color: #5e5a56; font-style: italic; font-size: 0.9em;">
+              Thanks for taking an interest :)
+            </p>
+          </div>
+        ]]>
+      </content>
+    </entry>
+  {% endfor %}
+</feed>
