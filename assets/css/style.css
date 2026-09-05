@@ -625,6 +625,64 @@ html[data-theme='dark'] .status-evergreen { color: #a5d6a7; }
   color: var(--text-muted);
 }
 
+/* RTL / LTR Direction Support */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="ltr"] {
+  text-align: left;
+}
+
+.journal-post-article[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+.journal-post-article[dir="ltr"] {
+  direction: ltr;
+  text-align: left;
+}
+
+.journal-entry[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+.journal-entry[dir="ltr"] {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Ensure code blocks and inline code stay LTR even in RTL posts */
+[dir="rtl"] pre,
+[dir="rtl"] code {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: embed;
+}
+
+/* RTL Blockquote styling */
+[dir="rtl"] blockquote {
+  border-left: none;
+  border-right: 4px solid var(--accent-color);
+  padding: 0.5rem 1.5rem 0.5rem 0;
+}
+
+/* RTL Meta spacing */
+[dir="rtl"] .journal-time,
+[dir="rtl"] .journal-location {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+/* RTL Lists inside post */
+.journal-post-article[dir="rtl"] ul,
+.journal-post-article[dir="rtl"] ol {
+  padding-left: 0;
+  padding-right: 1.5rem;
+}
+
 /* Top Scrollable Photo Strip */
 .post-photo-strip-container {
   margin: 0.5rem 0 2rem;

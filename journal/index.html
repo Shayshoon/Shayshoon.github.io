@@ -32,7 +32,7 @@ layout: null
     <div class="journal-list">
       <ul class="journal-list">
         {% for post in site.posts %}
-        <article class="journal-entry">
+        <article class="journal-entry" dir="{{ post.dir | default: 'rtl' }}">
           <a href="{{ post.url }}">
             <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%B %-d, %Y" }}</time>
             {% if post.time %}<span class="journal-time">{{ post.time }}</span>{% endif %}
