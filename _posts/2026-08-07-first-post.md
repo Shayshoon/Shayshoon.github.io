@@ -16,4 +16,8 @@ location: Technion
 
 תודה על הקריאה :)
 
-![](images/PXL_20260704_150449697.MP.jpg)
+![my cat](images/PXL_20260704_150449697.MP.jpg)
+
+### Gallery
+![Studying doodle](/assets/studying.png)
+![Naked cat](/assets/naked_cat.png)
