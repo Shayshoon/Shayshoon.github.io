@@ -23,10 +23,17 @@ layout: null
       <content type="html">
         <![CDATA[
           <div style="font-family: system-ui, sans-serif; line-height: 1.6; color: #2c2a29; max-width: 600px;">
-            <p style="color: #5e5a56; font-size: 0.9em; margin-bottom: 1.2em;">
-              <strong>Date:</strong> {{ post.date | date: "%B %-d, %Y" }}
-              {% if post.time %}<br><strong>Time:</strong> {{ post.time }}{% endif %}
-              {% if post.location %}<br><strong>Location:</strong> {{ post.location }}{% endif %}
+            {% assign words = post.content | strip_html | number_of_words %}
+            {% assign read_time = words | divided_by: 180 | at_least: 1 %}
+            {% assign content_imgs = post.content | split: '<img' | size | minus: 1 %}
+            {% assign strip_imgs = post.photos.size | default: post.gallery.size | default: 0 %}
+            {% assign total_photos = content_imgs | plus: strip_imgs %}
+
+            <p style="color: #736e68; font-size: 0.88em; margin-bottom: 1.2em;">
+              <span>⏱️ {{ read_time }} min read ({{ words }} words)</span>
+              {% if total_photos > 0 %}
+                <span> &bull; 📷 Includes {{ total_photos }} {% if total_photos == 1 %}photo{% else %}photos{% endif %}</span>
+              {% endif %}
             </p>
 
             <div style="font-size: 1.05em; margin: 1.2em 0;">
@@ -43,9 +50,22 @@ layout: null
               </a>
             </p>
 
-            <hr style="border: none; border-top: 1px dashed #e2ded6; margin: 2em 0 1em;" />
+            {% if post.previous %}
+              <p style="font-size: 0.88em; color: #5e5a56; margin: 1.5em 0 1em;">
+                ⏮️ <strong>In case you missed it:</strong>
+                <a href="{{ site.url }}{{ post.previous.url }}" style="color: #9c4125; text-decoration: underline;">
+                  {{ post.previous.title }}
+                </a>
+              </p>
+            {% endif %}
 
-            <p style="color: #5e5a56; font-style: italic; font-size: 0.9em;">
+            <hr style="border: none; border-top: 1px dashed #e2ded6; margin: 2em 0 1.2em;" />
+
+            <p style="color: #5e5a56; font-size: 0.9em; margin-bottom: 0.8em;">
+              💬 <em>Have thoughts, recommendations, or just want to say hi? Hit reply to this email or reach out on my site — I&apos;d love to hear from you!</em>
+            </p>
+
+            <p style="color: #5e5a56; font-style: italic; font-size: 0.9em; margin-top: 0.5em;">
               Thanks for taking an interest :)
             </p>
           </div>
