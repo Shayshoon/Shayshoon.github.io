@@ -26,12 +26,17 @@ layout: null
             {% assign words = post.content | strip_html | number_of_words %}
             {% assign read_time = words | divided_by: 180 | at_least: 1 %}
             {% assign content_imgs = post.content | split: '<img' | size | minus: 1 %}
-            {% assign strip_imgs = post.photos.size | default: post.gallery.size | default: 0 %}
-            {% assign total_photos = content_imgs | plus: strip_imgs %}
+            {% assign content_vids = post.content | split: '.mp4' | size | minus: 1 | at_least: 0 %}
+            {% assign strip_imgs = post.photos.size | default: post.gallery.size | default: post.media.size | default: 0 %}
+            {% assign total_photos = content_imgs | plus: strip_imgs | minus: content_vids | at_least: 0 %}
 
             <p style="color: #736e68; font-size: 0.88em; margin-bottom: 1.2em;">
               <span>⏱️ {{ read_time }} min read ({{ words }} words)</span>
-              {% if total_photos > 0 %}
+              {% if content_vids > 0 and total_photos > 0 %}
+                <span> &bull; 📷 Includes {{ total_photos }} {% if total_photos == 1 %}photo{% else %}photos{% endif %}, {{ content_vids }} {% if content_vids == 1 %}video{% else %}videos{% endif %}</span>
+              {% elsif content_vids > 0 %}
+                <span> &bull; 🎥 Includes {{ content_vids }} {% if content_vids == 1 %}video{% else %}videos{% endif %}</span>
+              {% elsif total_photos > 0 %}
                 <span> &bull; 📷 Includes {{ total_photos }} {% if total_photos == 1 %}photo{% else %}photos{% endif %}</span>
               {% endif %}
             </p>
@@ -46,7 +51,7 @@ layout: null
 
             <p style="margin: 1.5em 0;">
               <a href="{{ site.url }}{{ post.url }}" style="color: #9c4125; font-weight: bold; text-decoration: underline;">
-                Read the full post and view photos on the website &rarr;
+                Read the full post and view media on the website &rarr;
               </a>
             </p>
 

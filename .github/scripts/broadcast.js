@@ -36,10 +36,27 @@ function parsePost(filePath) {
   const words = cleanBody.trim().split(/\s+/).filter(Boolean).length;
   const readTime = Math.max(1, Math.round(words / 180));
 
-  // Count photos in body and frontmatter
-  const markdownImgCount = (body.match(/!\[.*?\]\([^)]+\)/g) || []).length;
+  // Count photos and videos in body and frontmatter
+  const videoRegex = /!\[.*?\]\([^)]+\.(mp4|webm|mov|ogg|m4v)[^)]*\)/gi;
+  const allMediaMatches = body.match(/!\[.*?\]\([^)]+\)/g) || [];
+  const videoMatches = body.match(videoRegex) || [];
+  const rawVideoCount = (body.match(/<video[\s>]/gi) || []).length;
+  const markdownVideoCount = videoMatches.length + rawVideoCount;
+  const markdownImgCount = Math.max(0, allMediaMatches.length - videoMatches.length);
+
   const frontmatterPhotos = Array.isArray(meta.photos) ? meta.photos.length : (Array.isArray(meta.gallery) ? meta.gallery.length : 0);
+  const frontmatterVideos = Array.isArray(meta.videos) ? meta.videos.length : 0;
   const totalPhotos = markdownImgCount + frontmatterPhotos;
+  const totalVideos = markdownVideoCount + frontmatterVideos;
+
+  let mediaDescription = '';
+  if (totalPhotos > 0 && totalVideos > 0) {
+    mediaDescription = `Includes ${totalPhotos} ${totalPhotos === 1 ? 'photo' : 'photos'}, ${totalVideos} ${totalVideos === 1 ? 'video' : 'videos'}`;
+  } else if (totalVideos > 0) {
+    mediaDescription = `Includes ${totalVideos} ${totalVideos === 1 ? 'video' : 'videos'}`;
+  } else if (totalPhotos > 0) {
+    mediaDescription = `Includes ${totalPhotos} ${totalPhotos === 1 ? 'photo' : 'photos'}`;
+  }
 
   return {
     filePath,
@@ -51,6 +68,8 @@ function parsePost(filePath) {
     words,
     readTime,
     totalPhotos,
+    totalVideos,
+    mediaDescription,
     body
   };
 }
@@ -94,7 +113,7 @@ function buildEmailHtml(post, prevPost) {
 
     <p style="color: #736e68; font-size: 13px; margin: 0 0 18px 0; font-family: ui-monospace, 'Cascadia Code', Menlo, monospace;">
       <span>⏱️ ${post.readTime} min read (${post.words} words)</span>
-      ${post.totalPhotos > 0 ? `<span> &bull; 📷 Includes ${post.totalPhotos} ${post.totalPhotos === 1 ? 'photo' : 'photos'}</span>` : ''}
+      ${post.mediaDescription ? `<span> &bull; 📷 🎥 ${post.mediaDescription}</span>` : ''}
     </p>
 
     ${post.summary ? `
@@ -104,7 +123,7 @@ function buildEmailHtml(post, prevPost) {
 
     <div style="margin: 24px 0 28px;">
       <a href="${post.url}" style="background-color: #9c4125; color: #ffffff; padding: 12px 22px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block; font-size: 15px;">
-        Read the full post and view photos on the website &rarr;
+        Read the full post and view media on the website &rarr;
       </a>
     </div>
 
@@ -139,14 +158,14 @@ function buildEmailHtml(post, prevPost) {
 function buildEmailText(post, prevPost) {
   let text = `New post: ${post.title}\n\n`;
   text += `⏱️ ${post.readTime} min read (${post.words} words)`;
-  if (post.totalPhotos > 0) {
-    text += ` • 📷 Includes ${post.totalPhotos} photos`;
+  if (post.mediaDescription) {
+    text += ` • 📷 🎥 ${post.mediaDescription}`;
   }
   text += `\n\n`;
   if (post.summary) {
     text += `${post.summary}\n\n`;
   }
-  text += `Read the full post and view photos: ${post.url}\n\n`;
+  text += `Read the full post and view media: ${post.url}\n\n`;
   if (prevPost) {
     text += `⏮️ In case you missed it: ${prevPost.title} (${prevPost.url})\n\n`;
   }
@@ -219,7 +238,7 @@ async function main() {
   console.log(`URL: ${post.url}`);
   console.log(`Date: ${post.date}`);
   console.log(`Summary: ${post.summary}`);
-  console.log(`Stats: ${post.readTime} min read (${post.words} words), ${post.totalPhotos} photos`);
+  console.log(`Stats: ${post.readTime} min read (${post.words} words)${post.mediaDescription ? `, ${post.mediaDescription}` : ''}`);
 
   const prevPost = getPreviousPost(targetPostFile);
   if (prevPost) {

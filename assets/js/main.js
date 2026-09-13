@@ -59,17 +59,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-  // Journal Post Image Lightbox & Scrollable Gallery
+  // Journal Post Image & Video Lightbox & Scrollable Gallery
   function initPostLightbox() {
     const journalContent = document.querySelector('.journal-content');
     let photoStripContainer = document.querySelector('.post-photo-strip-container');
     let photoStrip = document.querySelector('.post-photo-strip');
 
-    // Automatically detect and extract a Markdown gallery section (e.g. ### Gallery or ### Photos)
+    if (!journalContent && !photoStrip) return;
+
+    const VIDEO_EXT_REGEX = /\.(mp4|webm|mov|ogg|m4v)(\?.*)?$/i;
+    function isVideoUrl(url) {
+      if (!url) return false;
+      return VIDEO_EXT_REGEX.test(url.trim());
+    }
+
+    // 1. Transform in-body Markdown video images: ![caption](video.mp4) -> <div class="journal-video-wrapper">...</div>
+    if (journalContent) {
+      const inBodyImgs = Array.from(journalContent.querySelectorAll('img'));
+      inBodyImgs.forEach(img => {
+        const src = img.getAttribute('src') || img.src || '';
+        if (isVideoUrl(src)) {
+          const altText = (img.getAttribute('alt') || '').trim();
+          const videoWrapper = document.createElement('div');
+          videoWrapper.className = 'journal-video-wrapper';
+          videoWrapper.setAttribute('role', 'button');
+          videoWrapper.setAttribute('tabindex', '0');
+          videoWrapper.setAttribute('aria-label', (altText ? altText + ' - ' : '') + 'Click to view full video in gallery');
+
+          const videoEl = document.createElement('video');
+          videoEl.className = 'journal-video';
+          videoEl.src = src.includes('#t=') ? src : `${src}#t=0.001`;
+          videoEl.preload = 'metadata';
+          videoEl.muted = true;
+          videoEl.playsInline = true;
+
+          const playBtn = document.createElement('div');
+          playBtn.className = 'journal-video-play-btn';
+          playBtn.setAttribute('aria-hidden', 'true');
+          playBtn.textContent = '▶';
+
+          videoWrapper.appendChild(videoEl);
+          videoWrapper.appendChild(playBtn);
+
+          img.replaceWith(videoWrapper);
+
+          if (altText && !videoWrapper.parentElement.querySelector('.journal-caption')) {
+            const captionEl = document.createElement('div');
+            captionEl.className = 'journal-caption';
+            captionEl.textContent = altText;
+            videoWrapper.insertAdjacentElement('afterend', captionEl);
+          }
+        }
+      });
+    }
+
+    // 2. Extract Markdown gallery section (### Gallery, ### Photos, ### Videos, etc.)
+    const extraGalleryItems = [];
     if (journalContent) {
       const GALLERY_TITLES = [
-        'gallery', 'photos', 'photo strip', 'strip', 'images',
-        'תמונות', 'גלריה', 'רצועת תמונות'
+        'gallery', 'photos', 'photo strip', 'strip', 'images', 'videos', 'media',
+        'תמונות', 'גלריה', 'רצועת תמונות', 'סרטונים', 'מדיה', 'וידאו'
       ];
 
       const headings = Array.from(journalContent.querySelectorAll('h1, h2, h3, h4, h5, h6'));
@@ -81,7 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (galleryHeading) {
         const headingLevel = parseInt(galleryHeading.tagName.substring(1), 10);
         const elementsToRemove = [galleryHeading];
-        const extractedImages = [];
         let nextNode = galleryHeading.nextElementSibling;
 
         while (nextNode) {
@@ -92,62 +140,153 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
 
-          const imgs = nextNode.querySelectorAll('img');
-          imgs.forEach(img => {
-            extractedImages.push({
-              src: img.getAttribute('src') || img.src,
-              alt: (img.getAttribute('alt') || '').trim()
-            });
+          const mediaNodes = nextNode.querySelectorAll('img, video');
+          mediaNodes.forEach(node => {
+            if (node.tagName.toLowerCase() === 'video') {
+              const rawSrc = node.getAttribute('src') || node.currentSrc || node.querySelector('source')?.getAttribute('src') || '';
+              const cleanSrc = rawSrc.replace(/#t=[\d.]+/, '');
+              const alt = (node.getAttribute('title') || node.getAttribute('aria-label') || '').trim();
+              if (cleanSrc) {
+                extraGalleryItems.push({ type: 'video', src: cleanSrc, alt });
+              }
+            } else {
+              const src = node.getAttribute('src') || node.src || '';
+              const alt = (node.getAttribute('alt') || '').trim();
+              if (src) {
+                extraGalleryItems.push({
+                  type: isVideoUrl(src) ? 'video' : 'image',
+                  src: isVideoUrl(src) ? src.replace(/#t=[\d.]+/, '') : src,
+                  alt
+                });
+              }
+            }
           });
 
           elementsToRemove.push(nextNode);
           nextNode = nextNode.nextElementSibling;
         }
 
-        // Remove the gallery section from the body so it's not featured in the post body
         elementsToRemove.forEach(el => el.remove());
-
-        // Create or populate the top strip container with the extracted images
-        if (extractedImages.length > 0) {
-          if (!photoStripContainer) {
-            photoStripContainer = document.createElement('div');
-            photoStripContainer.className = 'post-photo-strip-container';
-            photoStripContainer.innerHTML = `<div class="post-photo-strip" aria-label="Photo strip gallery"></div>`;
-            journalContent.insertAdjacentElement('beforebegin', photoStripContainer);
-            photoStrip = photoStripContainer.querySelector('.post-photo-strip');
-          }
-
-          extractedImages.forEach(item => {
-            const btn = document.createElement('button');
-            btn.className = 'strip-thumb-btn';
-            btn.type = 'button';
-            btn.setAttribute('aria-label', (item.alt ? item.alt + ' - ' : '') + 'View photo in gallery');
-            btn.innerHTML = `<img src="${item.src}" alt="${item.alt}" class="strip-thumb-img" />`;
-            photoStrip.appendChild(btn);
-          });
-        }
       }
     }
 
-    if (!journalContent && !photoStrip) return;
+    // 3. Find all in-body media in document order
+    const inBodyMediaItems = [];
+    if (journalContent) {
+      const inBodyElements = Array.from(journalContent.querySelectorAll('img:not(.strip-thumb-img), .journal-video-wrapper, figure video:not(.journal-video)'));
+      inBodyElements.forEach(el => {
+        if (el.classList.contains('journal-video-wrapper')) {
+          const vid = el.querySelector('video');
+          const rawSrc = vid?.getAttribute('src') || vid?.currentSrc || '';
+          const cleanSrc = rawSrc.replace(/#t=[\d.]+/, '');
+          const captionEl = el.nextElementSibling?.classList.contains('journal-caption') ? el.nextElementSibling : null;
+          const alt = (captionEl ? captionEl.textContent : (el.getAttribute('aria-label') || '')).replace(/\s*-\s*Click to view full video in gallery$/i, '').trim();
+          inBodyMediaItems.push({
+            type: 'video',
+            src: cleanSrc,
+            alt: alt,
+            inBodyEl: el
+          });
+        } else if (el.tagName.toLowerCase() === 'img') {
+          const altText = (el.getAttribute('alt') || '').trim();
+          if (altText && !el.parentElement.querySelector('.journal-caption') && !el.closest('figure')?.querySelector('figcaption')) {
+            const captionEl = document.createElement('div');
+            captionEl.className = 'journal-caption';
+            captionEl.textContent = altText;
+            el.insertAdjacentElement('afterend', captionEl);
+          }
+          el.setAttribute('tabindex', '0');
+          el.setAttribute('role', 'button');
+          el.setAttribute('aria-label', (altText ? altText + ' - ' : '') + 'Click to view full image in gallery');
+          inBodyMediaItems.push({
+            type: 'image',
+            src: el.currentSrc || el.src,
+            alt: altText,
+            inBodyEl: el
+          });
+        } else if (el.tagName.toLowerCase() === 'video') {
+          const rawSrc = el.getAttribute('src') || el.currentSrc || '';
+          const cleanSrc = rawSrc.replace(/#t=[\d.]+/, '');
+          const figcaption = el.closest('figure')?.querySelector('figcaption');
+          const altText = (figcaption ? figcaption.textContent : (el.getAttribute('title') || el.getAttribute('aria-label') || '')).trim();
+          inBodyMediaItems.push({
+            type: 'video',
+            src: cleanSrc,
+            alt: altText,
+            inBodyEl: el
+          });
+        }
+      });
+    }
 
-    const stripImages = photoStrip ? Array.from(photoStrip.querySelectorAll('img')) : [];
-    const contentImages = journalContent ? Array.from(journalContent.querySelectorAll('img')) : [];
-    const images = [...stripImages, ...contentImages];
-    if (!images.length) return;
+    // 4. Combine all post media: in-body media (chronological story order) + extra gallery items
+    const allMedia = [...inBodyMediaItems, ...extraGalleryItems];
+    if (!allMedia.length) return;
 
-    // Create lightbox DOM elements if not already present
+    // 5. Populate or create the top images reel (photo & video strip)
+    if (allMedia.length > 0) {
+      if (!photoStripContainer) {
+        photoStripContainer = document.createElement('div');
+        photoStripContainer.className = 'post-photo-strip-container';
+        photoStripContainer.innerHTML = `<div class="post-photo-strip" aria-label="Photo and video gallery reel"></div>`;
+        journalContent.insertAdjacentElement('beforebegin', photoStripContainer);
+        photoStrip = photoStripContainer.querySelector('.post-photo-strip');
+      }
+
+      if (photoStrip) {
+        photoStrip.innerHTML = '';
+        allMedia.forEach((item, idx) => {
+          const btn = document.createElement('button');
+          btn.className = 'strip-thumb-btn' + (item.type === 'video' ? ' strip-thumb-video-btn' : '');
+          btn.type = 'button';
+          btn.setAttribute('aria-label', (item.alt ? item.alt + ' - ' : '') + `View ${item.type} in gallery`);
+          if (item.type === 'video') {
+            btn.innerHTML = `
+              <div class="strip-thumb-wrapper">
+                <video src="${item.src}#t=0.001" preload="metadata" muted playsinline class="strip-thumb-img strip-thumb-video"></video>
+                <span class="strip-play-badge" aria-hidden="true">▶</span>
+              </div>
+            `;
+          } else {
+            btn.innerHTML = `<img src="${item.src}" alt="${item.alt}" class="strip-thumb-img" />`;
+          }
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openLightbox(idx);
+          });
+          photoStrip.appendChild(btn);
+        });
+      }
+    }
+
+    // 6. Connect in-body elements to open lightbox at their index
+    allMedia.forEach((item, idx) => {
+      if (item.inBodyEl) {
+        item.inBodyEl.addEventListener('click', (e) => {
+          e.preventDefault();
+          openLightbox(idx);
+        });
+        item.inBodyEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openLightbox(idx);
+          }
+        });
+      }
+    });
+
+    // 7. Create lightbox DOM elements if not already present
     let lightbox = document.querySelector('.image-lightbox');
     if (!lightbox) {
       lightbox = document.createElement('div');
       lightbox.className = 'image-lightbox';
       lightbox.setAttribute('role', 'dialog');
       lightbox.setAttribute('aria-modal', 'true');
-      lightbox.setAttribute('aria-label', 'Image gallery');
+      lightbox.setAttribute('aria-label', 'Media gallery');
       lightbox.innerHTML = `
-        <button class="image-lightbox-close" aria-label="Close image gallery">&times;</button>
-        <button class="image-lightbox-arrow image-lightbox-prev" aria-label="Previous image">&#10094;</button>
-        <button class="image-lightbox-arrow image-lightbox-next" aria-label="Next image">&#10095;</button>
+        <button class="image-lightbox-close" aria-label="Close media gallery">&times;</button>
+        <button class="image-lightbox-arrow image-lightbox-prev" aria-label="Previous media">&#10094;</button>
+        <button class="image-lightbox-arrow image-lightbox-next" aria-label="Next media">&#10095;</button>
         <div class="image-lightbox-counter"></div>
         <div class="image-lightbox-track"></div>
       `;
@@ -160,62 +299,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextBtn = lightbox.querySelector('.image-lightbox-next');
     const counter = lightbox.querySelector('.image-lightbox-counter');
 
-    // Build the gallery slides for all images in the post (strip + body)
+    // 8. Build lightbox slides
     track.innerHTML = '';
-    images.forEach((img, idx) => {
-      const altText = (img.getAttribute('alt') || '').trim();
-      const isStripImg = img.classList.contains('strip-thumb-img');
-
-      // For in-body images: render caption on page if alt text is provided
-      if (!isStripImg && altText && !img.parentElement.querySelector('.journal-caption') && !img.closest('figure')?.querySelector('figcaption')) {
-        const captionEl = document.createElement('div');
-        captionEl.className = 'journal-caption';
-        captionEl.textContent = altText;
-        img.insertAdjacentElement('afterend', captionEl);
-      }
-
-      // Add interactive attributes to post image (if not already button-wrapped)
-      if (!isStripImg) {
-        img.setAttribute('tabindex', '0');
-        img.setAttribute('role', 'button');
-        img.setAttribute('aria-label', (altText ? altText + ' - ' : '') + 'Click to view full image in gallery');
-      }
-
-      // Create slide in lightbox track
+    allMedia.forEach((item, idx) => {
       const slide = document.createElement('div');
       slide.className = 'image-lightbox-slide';
       slide.setAttribute('data-index', idx);
 
-      const captionHtml = altText ? `<div class="image-lightbox-caption">${altText}</div>` : '';
-      slide.innerHTML = `
-        <div class="image-lightbox-container">
-          <img class="image-lightbox-img" src="${img.currentSrc || img.src}" alt="${altText}" />
-          ${captionHtml}
-        </div>
-      `;
-      track.appendChild(slide);
+      const captionHtml = item.alt ? `<div class="image-lightbox-caption">${item.alt}</div>` : '';
+      if (item.type === 'video') {
+        slide.innerHTML = `
+          <div class="image-lightbox-container image-lightbox-video-container">
+            <video class="image-lightbox-video" src="${item.src}" controls playsinline preload="auto"></video>
+            ${captionHtml}
+          </div>
+        `;
+      } else {
+        slide.innerHTML = `
+          <div class="image-lightbox-container">
+            <img class="image-lightbox-img" src="${item.src}" alt="${item.alt}" />
+            ${captionHtml}
+          </div>
+        `;
+      }
 
-      // Open lightbox trigger
-      const trigger = isStripImg ? (img.closest('.strip-thumb-btn') || img) : img;
-      trigger.addEventListener('click', (e) => {
-        e.preventDefault();
-        openLightbox(idx);
-      });
-
-      if (!isStripImg) {
-        img.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            openLightbox(idx);
-          }
+      // Stop click inside slide container from closing the lightbox
+      const container = slide.querySelector('.image-lightbox-container');
+      if (container) {
+        container.addEventListener('click', (e) => {
+          e.stopPropagation();
         });
       }
+
+      track.appendChild(slide);
     });
 
     const slides = Array.from(track.querySelectorAll('.image-lightbox-slide'));
     let currentIndex = 0;
     let previousActiveElement = null;
-    let isScrolling = false;
+    let isProgrammaticScroll = false;
 
     function updateNavState(index) {
       currentIndex = index;
@@ -224,6 +346,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       prevBtn.disabled = (currentIndex === 0);
       nextBtn.disabled = (currentIndex === slides.length - 1);
+
+      // Play video on active slide, pause on all others
+      slides.forEach((s, i) => {
+        const vid = s.querySelector('video');
+        if (vid) {
+          if (i !== currentIndex) {
+            vid.pause();
+          } else {
+            vid.play().catch(() => {});
+          }
+        }
+      });
     }
 
     function goToSlide(index, smooth = true) {
@@ -233,26 +367,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const targetSlide = slides[currentIndex];
       if (targetSlide) {
+        isProgrammaticScroll = true;
         track.scrollTo({
           left: targetSlide.offsetLeft,
           behavior: smooth ? 'smooth' : 'auto'
         });
+        setTimeout(() => {
+          isProgrammaticScroll = false;
+        }, smooth ? 400 : 80);
       }
       updateNavState(currentIndex);
     }
 
     function openLightbox(index) {
       previousActiveElement = document.activeElement;
+      document.querySelectorAll('.journal-content video').forEach(v => v.pause());
+
       lightbox.classList.add('active');
       document.body.style.overflow = 'hidden';
 
-      // Show or hide arrows & counter depending on image count
       const multiple = slides.length > 1;
       prevBtn.style.display = multiple ? 'flex' : 'none';
       nextBtn.style.display = multiple ? 'flex' : 'none';
       counter.style.display = multiple ? 'block' : 'none';
 
-      // Instantly position track at clicked slide
       goToSlide(index, false);
       closeBtn.focus();
     }
@@ -260,21 +398,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeLightbox() {
       lightbox.classList.remove('active');
       document.body.style.overflow = '';
+      slides.forEach(s => {
+        const vid = s.querySelector('video');
+        if (vid) {
+          vid.pause();
+        }
+      });
       if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
         previousActiveElement.focus();
       }
     }
 
-    // Update active slide on scroll (e.g. trackpad swipe, touch scroll, scroll-snap)
     track.addEventListener('scroll', () => {
+      if (isProgrammaticScroll) return;
       const slideWidth = track.clientWidth || window.innerWidth;
+      if (!slideWidth) return;
       const newIndex = Math.round(track.scrollLeft / slideWidth);
       if (newIndex !== currentIndex && newIndex >= 0 && newIndex < slides.length) {
         updateNavState(newIndex);
       }
     }, { passive: true });
 
-    // Mouse wheel navigation between slides
     let wheelTimeout = null;
     track.addEventListener('wheel', (e) => {
       if (slides.length <= 1) return;
@@ -291,7 +435,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }, { passive: false });
 
-    // Side navigation button clicks
     prevBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       goToSlide(currentIndex - 1);
@@ -302,29 +445,28 @@ document.addEventListener('DOMContentLoaded', () => {
       goToSlide(currentIndex + 1);
     });
 
-    // Close button click
     closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       closeLightbox();
     });
 
-    // Close when clicking outside image/container
     lightbox.addEventListener('click', (e) => {
-      if (e.target.classList.contains('image-lightbox-slide') || e.target.classList.contains('image-lightbox-track')) {
+      if (e.target.classList.contains('image-lightbox-slide') || e.target.classList.contains('image-lightbox-track') || e.target === lightbox) {
         closeLightbox();
       }
     });
 
-    // Keyboard navigation (Escape, ArrowLeft, ArrowRight)
     document.addEventListener('keydown', (e) => {
       if (!lightbox.classList.contains('active')) return;
 
       if (e.key === 'Escape') {
         closeLightbox();
       } else if (e.key === 'ArrowLeft') {
+        if (document.activeElement && document.activeElement.tagName === 'VIDEO') return;
         e.preventDefault();
         goToSlide(currentIndex - 1);
       } else if (e.key === 'ArrowRight') {
+        if (document.activeElement && document.activeElement.tagName === 'VIDEO') return;
         e.preventDefault();
         goToSlide(currentIndex + 1);
       }
