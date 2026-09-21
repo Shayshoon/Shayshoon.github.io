@@ -29,21 +29,34 @@
         </div>
       </div>
 
-      {% if page.photos or page.gallery %}
+      {% if page.photos or page.gallery or page.videos or page.media %}
       <div class="post-photo-strip-container">
-        <div class="post-photo-strip" aria-label="Photo strip gallery">
-          {% assign strip_items = page.photos | default: page.gallery %}
+        <div class="post-photo-strip" aria-label="Photo and video gallery strip">
+          {% assign strip_items = page.photos | default: page.gallery | default: page.videos | default: page.media %}
           {% for item in strip_items %}
-          {% if item.image or item.url or item.src %}
-          {% assign img_url = item.image | default: item.url | default: item.src %}
-          {% assign img_caption = item.caption | default: item.alt | default: '' %}
+          {% if item.image or item.video or item.url or item.src %}
+          {% assign media_url = item.video | default: item.image | default: item.url | default: item.src %}
+          {% assign media_caption = item.caption | default: item.alt | default: '' %}
           {% else %}
-          {% assign img_url = item %}
-          {% assign img_caption = '' %}
+          {% assign media_url = item %}
+          {% assign media_caption = '' %}
           {% endif %}
-          <button class="strip-thumb-btn" type="button" aria-label="View photo in gallery">
-            <img src="{{ img_url }}" alt="{{ img_caption }}" class="strip-thumb-img" />
+          {% assign is_vid = false %}
+          {% if item.video or media_url contains '.mp4' or media_url contains '.webm' or media_url contains '.mov' or media_url contains '.ogg' or media_url contains '.m4v' %}
+          {% assign is_vid = true %}
+          {% endif %}
+          {% if is_vid %}
+          <button class="strip-thumb-btn strip-thumb-video-btn" type="button" aria-label="{% if media_caption != '' %}{{ media_caption }} - {% endif %}View video in gallery">
+            <div class="strip-thumb-wrapper">
+              <video src="{{ media_url }}#t=0.001" preload="metadata" muted playsinline class="strip-thumb-img strip-thumb-video"></video>
+              <span class="strip-play-badge" aria-hidden="true">▶</span>
+            </div>
           </button>
+          {% else %}
+          <button class="strip-thumb-btn" type="button" aria-label="{% if media_caption != '' %}{{ media_caption }} - {% endif %}View photo in gallery">
+            <img src="{{ media_url }}" alt="{{ media_caption }}" class="strip-thumb-img" />
+          </button>
+          {% endif %}
           {% endfor %}
         </div>
       </div>
